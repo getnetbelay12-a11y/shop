@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Shop Seller",
+    "slug": "shop-seller",
+    "scheme": "shop-seller",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "plugins": [
+      "expo-router",
+      "expo-image-picker"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.shop-seller"
+    }
+  }
+}

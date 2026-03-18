@@ -1,0 +1,46 @@
+{
+  "name": "shop",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "web:dev": "next dev",
+    "build": "next build",
+    "web:build": "next build",
+    "start": "next start",
+    "seed": "node --env-file=.env.local --import tsx scripts/seed.ts",
+    "worker": "node --env-file=.env.local --import tsx scripts/worker.ts",
+    "mobile:install": "cd apps/mobile && npm install",
+    "mobile:dev": "cd apps/mobile && npm run dev"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
+    "@hookform/resolvers": "^5.2.2",
+    "autoprefixer": "^10.4.21",
+    "bcryptjs": "^3.0.2",
+    "bullmq": "^5.61.2",
+    "cloudinary": "^2.8.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "ioredis": "^5.8.1",
+    "lucide-react": "^0.542.0",
+    "mongoose": "^8.18.0",
+    "next": "^15.5.3",
+    "next-auth": "^4.24.11",
+    "openai": "^5.20.1",
+    "postcss": "^8.5.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-hook-form": "^7.62.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.12",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9"
+  }
+}
