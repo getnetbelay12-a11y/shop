@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 
 type ProductCardProps = {
-  storeSlug: string;
+  storeSlug?: string;
+  href?: string;
   product: {
     _id: string;
     title: string;
@@ -14,36 +15,48 @@ type ProductCardProps = {
     images?: string[];
     tags?: string[];
     stock: number;
+    storeName?: string;
   };
 };
 
-export function ProductCard({ product, storeSlug }: ProductCardProps) {
+export function ProductCard({ product, storeSlug, href }: ProductCardProps) {
+  const productHref = href || `/shop/${storeSlug}/product/${product._id}`;
   return (
-    <Link href={`/shop/${storeSlug}/product/${product._id}`} className="group block">
-      <Card className="overflow-hidden transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_55px_rgba(15,23,42,0.12)]">
-        <div className="relative aspect-square bg-stone-100">
+    <Link href={productHref} className="group block">
+      <Card className="overflow-hidden rounded-xl border-stone-200 bg-white transition duration-200 group-hover:-translate-y-0.5 group-hover:border-stone-300 group-hover:shadow-[var(--surface-shadow-strong)]">
+        <div className="relative aspect-[4/5] bg-stone-100">
           {product.images?.[0] ? (
             <Image src={product.images[0]} alt={product.title} fill className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-stone-500">No image</div>
           )}
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/40 to-transparent p-4">
-            <div className="inline-flex rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-stone-800">
-              {product.stock > 0 ? "Ready to order" : "Out of stock"}
+          <div className="absolute left-3 top-3">
+            <div className="inline-flex rounded-full border border-white/80 bg-white/92 px-2.5 py-1 text-[10px] font-semibold text-stone-800 shadow-sm">
+              {product.stock > 0 ? "Ready" : "Sold out"}
             </div>
           </div>
         </div>
-        <div className="space-y-3 p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h3 className="line-clamp-2 text-lg font-semibold tracking-tight">{product.title}</h3>
-              <p className="mt-1 text-sm text-stone-500">{product.category}</p>
+        <div className="space-y-2.5 p-3">
+          <div className="flex items-start justify-between gap-2.5">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-400">{product.storeName || product.category}</p>
+              <h3 className="mt-1 line-clamp-2 min-h-[2.5rem] text-[13px] font-semibold leading-5 tracking-tight text-stone-900 sm:text-sm">{product.title}</h3>
+              <p className="mt-1 line-clamp-1 text-[11px] text-stone-500">{product.category}</p>
             </div>
-            <Badge className="bg-stone-100/90">{product.stock > 0 ? "In stock" : "Sold out"}</Badge>
+            <Badge className="shrink-0 text-[10px]">{product.stock > 0 ? "In stock" : "Sold out"}</Badge>
           </div>
           <div className="flex items-end justify-between gap-3">
-            <span className="text-xl font-bold">{formatCurrency(product.price)}</span>
-            <span className="text-right text-xs text-stone-500">{product.tags?.slice(0, 2).join(" • ")}</span>
+            <div>
+              <span className="text-xl font-bold tracking-tight text-stone-950">{formatCurrency(product.price)}</span>
+              <p className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-stone-400">ETB price</p>
+            </div>
+            <span className="line-clamp-1 text-right text-[11px] text-stone-500">{product.tags?.slice(0, 2).join(" • ")}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2 border-t border-stone-100 pt-2">
+            <span className="line-clamp-1 text-[11px] font-medium text-stone-500">{product.storeName ? `Sold by ${product.storeName}` : "Open product"}</span>
+            <span className="inline-flex h-8 items-center justify-center rounded-md bg-[var(--primary)] px-3 text-[11px] font-semibold text-white transition group-hover:bg-slate-950">
+              View
+            </span>
           </div>
         </div>
       </Card>

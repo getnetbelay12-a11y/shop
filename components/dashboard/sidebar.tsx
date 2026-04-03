@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { BarChart3, Boxes, LayoutDashboard, MessagesSquare, PackageSearch, Settings, ShoppingBag } from "lucide-react";
+import { BarChart3, Boxes, MessagesSquare, PackageSearch, Settings, ShoppingBag, Store } from "lucide-react";
 
 const items = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/products", label: "Products", icon: Boxes },
-  { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/dashboard/orders", label: "Requests", icon: ShoppingBag },
   { href: "/dashboard/conversations", label: "Conversations", icon: MessagesSquare },
+  { href: "/dashboard", label: "Overview", icon: Store },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/setup", label: "Store setup", icon: PackageSearch },
   { href: "/dashboard/settings", label: "Settings", icon: Settings }

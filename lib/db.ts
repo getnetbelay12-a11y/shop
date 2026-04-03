@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { env } from "@/lib/env";
+import { mongoUri } from "@/lib/env";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -11,11 +11,11 @@ global.mongooseCache = globalCache;
 
 export async function connectToDatabase() {
   if (globalCache.conn) return globalCache.conn;
-  if (!env.MONGO_URI) {
-    throw new Error("MONGO_URI is not configured.");
+  if (!mongoUri) {
+    throw new Error("MongoDB connection string is not configured. Set MONGO_URI or MONGODB_URI.");
   }
   if (!globalCache.promise) {
-    globalCache.promise = mongoose.connect(env.MONGO_URI, {
+    globalCache.promise = mongoose.connect(mongoUri, {
       dbName: "shop"
     });
   }

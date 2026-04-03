@@ -1,11 +1,33 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { recordAnalytics } from "@/lib/data";
+import { getStoreConversationById, recordAnalytics } from "@/lib/data";
 import { storeAssistant } from "@/lib/ai";
 import { ConversationModel } from "@/models/Conversation";
 import { MessageModel } from "@/models/Message";
 import { ProductModel } from "@/models/Product";
 import { StorefrontModel } from "@/models/Storefront";
+
+export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const { searchParams } = new URL(request.url);
+  const conversationId = searchParams.get("conversationId");
+  if (!conversationId) {
+    return NextResponse.json({ messages: [] });
+  }
+  const conversation = await getStoreConversationById(slug, conversationId);
+  if (!conversation) {
+    return NextResponse.json({ error: "Conversation not found." }, { status: 404 });
+  }
+  return NextResponse.json({
+    conversationId: String(conversation._id),
+    messages: conversation.messages.map((message: any) => ({
+      _id: String(message._id),
+      role: message.role,
+      content: message.content,
+      createdAt: message.createdAt
+    }))
+  });
+}
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

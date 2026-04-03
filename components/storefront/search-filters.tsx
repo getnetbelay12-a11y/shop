@@ -18,48 +18,69 @@ export function SearchFilters({ categories }: { categories: string[] }) {
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-[1fr_220px_auto_auto]">
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-        <Input
-          name="store-search"
-          defaultValue={params.get("q") ?? ""}
-          placeholder="Search products, tags, category..."
-          className="pl-10"
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              update({ q: (event.target as HTMLInputElement).value });
-            }
+    <div className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-[1fr_220px_auto_auto]">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
+          <Input
+            name="store-search"
+            defaultValue={params.get("q") ?? ""}
+            placeholder="Search products, tags, category..."
+            className="pl-10"
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                update({ q: (event.target as HTMLInputElement).value });
+              }
+            }}
+          />
+        </div>
+        <select
+          className="h-11 rounded-2xl border border-[var(--border)] bg-white px-4 text-sm"
+          defaultValue={params.get("category") ?? ""}
+          onChange={(event) => update({ category: event.target.value })}
+          >
+          <option value="">All categories</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>{category}</option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="h-11 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white"
+          onClick={() => {
+            const input = document.querySelector<HTMLInputElement>("input[name='store-search']");
+            update({ q: input?.value ?? "" });
           }}
-        />
-      </div>
-      <select
-        className="h-11 rounded-2xl border border-[var(--border)] bg-white px-4 text-sm"
-        defaultValue={params.get("category") ?? ""}
-        onChange={(event) => update({ category: event.target.value })}
         >
-        <option value="">All categories</option>
-        {categories.map((category) => (
-          <option key={category} value={category}>{category}</option>
+          Search
+        </button>
+        <button
+          type="button"
+          className="h-11 rounded-2xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-stone-700"
+          onClick={() => router.push("?")}
+        >
+          Reset
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className={`rounded-full px-4 py-2 text-sm font-semibold ${!(params.get("category") ?? "") ? "bg-stone-900 text-white" : "border border-[var(--border)] bg-white text-stone-700"}`}
+          onClick={() => update({ category: "" })}
+        >
+          All
+        </button>
+        {categories.slice(0, 8).map((category) => (
+          <button
+            key={category}
+            type="button"
+            className={`rounded-full px-4 py-2 text-sm font-semibold ${params.get("category") === category ? "bg-stone-900 text-white" : "border border-[var(--border)] bg-white text-stone-700"}`}
+            onClick={() => update({ category })}
+          >
+            {category}
+          </button>
         ))}
-      </select>
-      <button
-        type="button"
-        className="h-11 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white"
-        onClick={() => {
-          const input = document.querySelector<HTMLInputElement>("input[name='store-search']");
-          update({ q: input?.value ?? "" });
-        }}
-      >
-        Search
-      </button>
-      <button
-        type="button"
-        className="h-11 rounded-2xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-stone-700"
-        onClick={() => router.push("?")}
-      >
-        Reset
-      </button>
+      </div>
     </div>
   );
 }

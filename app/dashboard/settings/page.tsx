@@ -18,9 +18,15 @@ export default async function SettingsPage() {
       <Card className="p-6">
         <h1 className="text-3xl font-bold">Seller settings</h1>
         <p className="mt-2 text-sm text-stone-600">Manage your phone-first identity and storefront details.</p>
-        <div className="mt-4 rounded-2xl bg-stone-50 p-4 text-sm text-stone-700">
-          <p className="font-semibold">Verified phone number</p>
-          <p className="mt-1">{session.user.phoneNumber || store?.phone || "No phone on file"}</p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl bg-stone-50 p-4 text-sm text-stone-700">
+            <p className="font-semibold">Verified phone number</p>
+            <p className="mt-1">{session.user.phoneNumber || store?.phone || "No phone on file"}</p>
+          </div>
+          <div className="rounded-2xl bg-stone-50 p-4 text-sm text-stone-700">
+            <p className="font-semibold">Language preference</p>
+            <p className="mt-1">{store?.language === "AM" ? "አማርኛ (አማ)" : "English (EN)"}</p>
+          </div>
         </div>
       </Card>
       <Card className="p-6">

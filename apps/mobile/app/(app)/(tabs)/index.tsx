@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import { Share, ScrollView, Text, View } from "react-native";
-import { apiBaseUrl, apiRequest } from "@/lib/api";
+import { apiRequest } from "@/lib/api";
 import { getLanguage, t } from "@/lib/i18n";
+import { buildStorefrontUrl } from "@/lib/public-site";
 import { colors } from "@/lib/theme";
 import { useAuth } from "@/providers/auth-provider";
 import { AppButton, Card, Heading, InfoBanner, Screen, SectionTitle } from "@/components/ui";
@@ -15,7 +16,7 @@ export default function DashboardScreen() {
     queryFn: () => apiRequest<{ metrics: any }>("/api/mobile/dashboard", {}, token || undefined)
   });
   const metrics = data?.metrics;
-  const storeLink = store?.slug ? `${apiBaseUrl}/shop/${store.slug}` : "";
+  const storeLink = store?.slug ? buildStorefrontUrl(store.slug) : "";
   const language = getLanguage(store?.language);
 
   return (

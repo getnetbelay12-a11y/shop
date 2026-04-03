@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f5f1;
-  --foreground: #171717;
-  --card: rgba(255, 255, 255, 0.9);
-  --muted: #ece7dd;
+  --background: #f6f7f9;
+  --foreground: #0f172a;
+  --card: rgba(255, 255, 255, 0.98);
+  --muted: #f1f3f5;
   --primary: #0f766e;
   --primary-foreground: #f7fffd;
   --secondary: #dd8d27;
-  --border: rgba(23, 23, 23, 0.08);
-  --surface-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+  --border: rgba(15, 23, 42, 0.1);
+  --surface-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  --surface-shadow-strong: 0 18px 36px rgba(15, 23, 42, 0.08);
 }
 
 * {
@@ -18,11 +19,7 @@
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgba(221, 141, 39, 0.16), transparent 28%),
-    radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(246, 245, 241, 0.94)),
-    var(--background);
+  background: linear-gradient(180deg, #fbfbfc, #f5f6f8 22%, #f6f7f9);
   color: var(--foreground);
   font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
   min-width: 320px;
@@ -47,4 +44,15 @@ button {
 
 button {
   cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  color: var(--foreground);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
 }

@@ -1,10 +1,10 @@
-import { Platform } from "react-native";
+import { publicSiteUrl } from "@/lib/public-site";
 
 const configuredBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 const apiBaseUrl =
   configuredBaseUrl ||
-  (Platform.OS === "android" ? "http://10.0.2.2:3000" : "http://localhost:3000");
+  publicSiteUrl;
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
   const headers = new Headers(options.headers || {});

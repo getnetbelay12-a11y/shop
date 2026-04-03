@@ -5,9 +5,11 @@ import { ConversationModel } from "@/models/Conversation";
 import { MessageModel } from "@/models/Message";
 import { OrderModel } from "@/models/Order";
 import { ProductModel } from "@/models/Product";
+import { ProductRequestModel } from "@/models/ProductRequest";
 import { SellerProfileModel } from "@/models/SellerProfile";
 import { StorefrontModel } from "@/models/Storefront";
 import { UserModel } from "@/models/User";
+import { InterestLeadModel } from "@/models/InterestLead";
 import { getAnalyticsQueue } from "@/lib/redis";
 
 const SEARCH_SYNONYMS: Record<string, string[]> = {
@@ -115,6 +117,74 @@ export async function getProductById(storeSlug: string, productId: string): Prom
   return (await ProductModel.findOne({ _id: productId, storeId: store._id }).lean()) as any;
 }
 
+export async function getGlobalProductById(productId: string): Promise<any | null> {
+  await connectToDatabase();
+  const product = await ProductModel.findById(productId).lean() as any;
+  if (!product) return null;
+  const store = await StorefrontModel.findById(product.storeId).lean() as any;
+  if (!store || store.status !== "active") return null;
+  return {
+    ...product,
+    storeSlug: store.slug,
+    storeName: store.storeName,
+    storePhone: store.phone
+  };
+}
+
+export async function getMarketplaceProducts(input: {
+  query?: string;
+  category?: string;
+  sort?: string;
+  limit?: number;
+}) {
+  await connectToDatabase();
+  const stores = await StorefrontModel.find({ status: "active" }).select("_id slug storeName phone").lean() as any[];
+  const storeMap = new Map(stores.map((store) => [String(store._id), store]));
+  const products = await ProductModel.find({
+    storeId: { $in: stores.map((store) => store._id) },
+    ...(input.category ? { category: input.category } : {})
+  }).lean() as any[];
+
+  const enriched = products
+    .map((product) => {
+      const store = storeMap.get(String(product.storeId));
+      if (!store) return null;
+      return {
+        ...product,
+        storeSlug: store.slug,
+        storeName: store.storeName,
+        storePhone: store.phone,
+        searchScore: scoreProduct(
+          {
+            title: product.title,
+            description: product.description,
+            category: product.category,
+            tags: product.tags ?? []
+          },
+          input.query ?? ""
+        )
+      };
+    })
+    .filter(Boolean) as any[];
+
+  const filtered = enriched.filter((product) => (input.query ? product.searchScore > 0 : true));
+  const sort = input.sort ?? "newest";
+  filtered.sort((a, b) => {
+    if (sort === "price-asc") return a.price - b.price;
+    if (sort === "price-desc") return b.price - a.price;
+    if (input.query && b.searchScore !== a.searchScore) return b.searchScore - a.searchScore;
+    return new Date(String(b.createdAt)).getTime() - new Date(String(a.createdAt)).getTime();
+  });
+
+  return filtered.slice(0, input.limit ?? 24);
+}
+
+export async function getMarketplaceCategories() {
+  await connectToDatabase();
+  const stores = await StorefrontModel.find({ status: "active" }).select("_id").lean() as any[];
+  return ProductModel.distinct("category", { storeId: { $in: stores.map((store) => store._id) } });
+}
+
 export async function getSimilarProducts(productId: string, limit = 4): Promise<any[]> {
   await connectToDatabase();
   const product = (await ProductModel.findById(productId).lean()) as any;
@@ -168,19 +238,29 @@ export async function getDashboardMetrics(userId: string) {
   await connectToDatabase();
   const store = (await StorefrontModel.findOne({ sellerId: userId }).lean()) as any;
   if (!store) return null;
-  const [products, orders, lowStock, events, conversations] = await Promise.all([
+  const [products, orders, requests, lowStock, events, conversations] = await Promise.all([
     ProductModel.countDocuments({ sellerId: userId }),
     OrderModel.countDocuments({ sellerId: userId }),
+    ProductRequestModel.countDocuments({ sellerId: userId, status: "new" }),
     ProductModel.countDocuments({ sellerId: userId, stock: { $lte: 3 } }),
     AnalyticsEventModel.countDocuments({ sellerId: userId, type: "store_view" }),
     ConversationModel.countDocuments({ sellerId: userId })
   ]);
-  return { store, products, orders, lowStock, visits: events, conversations };
+  return { store, products, orders, requests, lowStock, visits: events, conversations };
 }
 
 export async function getSellerOrders(userId: string): Promise<any[]> {
   await connectToDatabase();
   return (await OrderModel.find({ sellerId: userId }).sort({ createdAt: -1 }).populate("productId").lean()) as any[];
+}
+
+export async function getSellerRequests(userId: string): Promise<any[]> {
+  await connectToDatabase();
+  return (await ProductRequestModel.find({ sellerId: userId })
+    .sort({ createdAt: -1 })
+    .populate("productId")
+    .populate("storefrontId")
+    .lean()) as any[];
 }
 
 export async function getSellerProducts(userId: string): Promise<any[]> {
@@ -197,6 +277,46 @@ export async function getSellerConversations(userId: string): Promise<any[]> {
     ...conversation,
     messages: messages.filter((message) => String(message.conversationId) === String(conversation._id))
   }));
+}
+
+export async function getSellerConversationById(userId: string, conversationId: string): Promise<any | null> {
+  await connectToDatabase();
+  const conversation = (await ConversationModel.findOne({ _id: conversationId, sellerId: userId }).lean()) as any;
+  if (!conversation) return null;
+  const messages = (await MessageModel.find({ conversationId }).sort({ createdAt: 1 }).lean()) as any[];
+  return {
+    ...conversation,
+    messages
+  };
+}
+
+export async function addSellerConversationMessage(userId: string, conversationId: string, content: string) {
+  await connectToDatabase();
+  const conversation = await ConversationModel.findOne({ _id: conversationId, sellerId: userId });
+  if (!conversation) {
+    throw new Error("Conversation not found.");
+  }
+  const message = await MessageModel.create({
+    conversationId: conversation._id,
+    role: "seller",
+    content: content.trim()
+  });
+  conversation.updatedAt = new Date();
+  await conversation.save();
+  return message.toObject();
+}
+
+export async function getStoreConversationById(storeSlug: string, conversationId: string): Promise<any | null> {
+  await connectToDatabase();
+  const store = (await StorefrontModel.findOne({ slug: storeSlug }).lean()) as any;
+  if (!store) return null;
+  const conversation = (await ConversationModel.findOne({ _id: conversationId, storeId: store._id }).lean()) as any;
+  if (!conversation) return null;
+  const messages = (await MessageModel.find({ conversationId }).sort({ createdAt: 1 }).lean()) as any[];
+  return {
+    ...conversation,
+    messages
+  };
 }
 
 export async function getSellerAnalytics(userId: string): Promise<any> {
@@ -218,13 +338,15 @@ export async function getSellerAnalytics(userId: string): Promise<any> {
 
 export async function getAdminData(): Promise<any> {
   await connectToDatabase();
-  const [sellers, stores, products, orders] = await Promise.all([
+  const [sellers, stores, products, orders, requests, leads] = await Promise.all([
     UserModel.find({ role: "seller" }).lean(),
     StorefrontModel.find().lean(),
     ProductModel.find().lean(),
-    OrderModel.find().lean()
+    OrderModel.find().lean(),
+    ProductRequestModel.find().sort({ createdAt: -1 }).populate("productId").populate("storefrontId").lean(),
+    InterestLeadModel.find().sort({ createdAt: -1 }).limit(20).lean()
   ]);
-  return { sellers: sellers as any[], stores: stores as any[], products: products as any[], orders: orders as any[] };
+  return { sellers: sellers as any[], stores: stores as any[], products: products as any[], orders: orders as any[], requests: requests as any[], leads: leads as any[] };
 }
 
 export async function createSellerSetup(userId: string, input: {

@@ -41,6 +41,20 @@ Notes:
 - Local development should still use `http://localhost:3000`
 - The codebase metadata and canonical URL handling now support `shegahomes.com`
 
+## Production checklist
+
+Before going live:
+1. Set `APP_URL`, `NEXTAUTH_URL`, and `EXPO_PUBLIC_API_BASE_URL` to `https://shegahomes.com`
+2. Configure MongoDB production access
+3. Replace `OTP_PROVIDER=dev` with a real SMS provider integration
+4. Add `OPENAI_API_KEY` for live AI generation
+5. Add `CLOUDINARY` for hosted image uploads
+6. Add `REDIS_URL` for queued analytics jobs
+7. Verify `/api/health` returns healthy service status
+8. Verify seller login, storefront browsing, AI chat, orders, dashboard, and admin
+9. Confirm SSL is active for `shegahomes.com`
+10. Redeploy after every production env change
+
 ## Demo login
 
 - Seller phone: `+251911223344`

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   MONGO_URI: z.string().optional(),
+  MONGODB_URI: z.string().optional(),
   NEXTAUTH_SECRET: z.string().optional(),
   NEXTAUTH_URL: z.string().optional(),
   APP_URL: z.string().optional(),
@@ -17,6 +18,7 @@ const envSchema = z.object({
 
 export const env = envSchema.parse({
   MONGO_URI: process.env.MONGO_URI,
+  MONGODB_URI: process.env.MONGODB_URI,
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   APP_URL: process.env.APP_URL,
@@ -29,3 +31,5 @@ export const env = envSchema.parse({
   OTP_REQUEST_COOLDOWN_SECONDS: process.env.OTP_REQUEST_COOLDOWN_SECONDS,
   EXPO_PUBLIC_API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL
 });
+
+export const mongoUri = env.MONGO_URI || env.MONGODB_URI;

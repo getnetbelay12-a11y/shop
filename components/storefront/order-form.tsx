@@ -42,7 +42,7 @@ export function OrderForm({ productId, storeSlug }: { productId: string; storeSl
 
   return (
     <form ref={formRef} action={submit} className="space-y-3">
-      <p className="text-sm text-stone-600">Fill in your contact details and the seller will follow up directly.</p>
+      <p className="text-sm text-stone-600">You only enter your phone and delivery details when you are ready to buy. The seller receives everything directly.</p>
       <Input name="name" placeholder="Your name" required />
       <Input name="phone" placeholder="Phone" inputMode="tel" required />
       <Input name="telegram" placeholder="Telegram username (optional)" />

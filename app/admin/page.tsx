@@ -20,7 +20,7 @@ export default async function AdminPage() {
           ["Sellers", data.sellers.length],
           ["Stores", data.stores.length],
           ["Products", data.products.length],
-          ["Orders", data.orders.length]
+          ["Requests", data.requests.length]
         ].map(([label, value]) => (
           <Card key={label} className="p-6">
             <p className="text-sm text-stone-500">{label}</p>
@@ -28,6 +28,37 @@ export default async function AdminPage() {
           </Card>
         ))}
       </div>
+      <Card className="mt-6 p-6">
+        <h2 className="text-2xl font-semibold">Newest customer requests</h2>
+        <div className="mt-4 grid gap-3">
+          {!data.requests.length ? <p className="text-sm text-stone-600">No product requests yet.</p> : null}
+          {data.requests.slice(0, 12).map((request) => (
+            <div key={String(request._id)} className="rounded-2xl border border-[var(--border)] bg-white p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-semibold">{request.productId?.title || "Product request"}</p>
+                  <p className="text-sm text-stone-600">
+                    {request.customerPhone} • {request.customerName || "Unnamed buyer"} • {request.storefrontId?.storeName || "Store"}
+                  </p>
+                </div>
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase text-amber-700">{request.status}</span>
+              </div>
+              {request.note ? <p className="mt-2 text-sm text-stone-600">{request.note}</p> : null}
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card className="mt-6 p-6">
+        <h2 className="text-2xl font-semibold">Products</h2>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {data.products.slice(0, 12).map((product) => (
+            <div key={String(product._id)} className="rounded-2xl border border-[var(--border)] bg-white p-4">
+              <p className="font-semibold">{product.title}</p>
+              <p className="mt-1 text-sm text-stone-600">{product.category} • {product.price} ETB • stock {product.stock}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
       <Card className="mt-6 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -54,6 +85,23 @@ export default async function AdminPage() {
                 </span>
               </div>
               <p className="mt-3 text-sm leading-6 text-stone-600">{service.summary}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card className="mt-6 p-6">
+        <h2 className="text-2xl font-semibold">Buyer and seller leads</h2>
+        <div className="mt-4 grid gap-3">
+          {!data.leads.length ? <p className="text-sm text-stone-600">No buyer or seller leads yet.</p> : null}
+          {data.leads.map((lead) => (
+            <div key={String(lead._id)} className="rounded-2xl border border-[var(--border)] bg-white p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-semibold">{lead.name || "Unnamed lead"}</p>
+                  <p className="text-sm text-stone-600">{lead.intent} • {lead.phoneNumber || lead.email || "No contact"}</p>
+                </div>
+                <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold uppercase text-stone-700">{lead.source || "web"}</span>
+              </div>
             </div>
           ))}
         </div>

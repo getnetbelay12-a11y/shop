@@ -41,3 +41,12 @@ export const orderSchema = z.object({
   address: z.string().trim().min(5, "Address must be at least 5 characters."),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1.")
 });
+
+export const requestSchema = z.object({
+  productId: z.string().min(1),
+  storeSlug: z.string().min(1),
+  customerPhone: z.string().trim().min(7, "Phone number looks too short."),
+  customerName: z.string().trim().optional(),
+  note: z.string().trim().max(280, "Note is too long.").optional(),
+  source: z.enum(["web", "mobile"]).default("web")
+});

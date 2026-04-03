@@ -1,11 +1,14 @@
 export const dynamic = "force-dynamic";
 
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { Shell } from "@/components/layout/shell";
 import { AIChat } from "@/components/storefront/ai-chat";
 import { ProductCard } from "@/components/product-card";
 import { SearchFilters } from "@/components/storefront/search-filters";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { connectToDatabase } from "@/lib/db";
 import { ProductModel } from "@/models/Product";
@@ -72,6 +75,23 @@ export default async function StorefrontPage({
           </div>
         </Card>
         <AIChat storeSlug={slug} />
+        <Card className="mt-6 p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-stone-500">Buy flow</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight">Browse freely. Share contact details only when you place an order.</h2>
+              <p className="mt-2 text-sm leading-6 text-stone-600">Open any product to order. The seller will receive your phone number, address, and quantity only when you decide to buy.</p>
+            </div>
+            {products[0] ? (
+              <Link href={`/shop/${slug}/product/${String(products[0]._id)}`}>
+                <Button>
+                  Open a product
+                  <ArrowRight className="ml-2 size-4" />
+                </Button>
+              </Link>
+            ) : null}
+          </div>
+        </Card>
       </main>
     </Shell>
   );

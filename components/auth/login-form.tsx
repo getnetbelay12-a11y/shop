@@ -15,40 +15,58 @@ export function LoginForm() {
   const [step, setStep] = useState<"phone" | "verify">("phone");
   const [pending, setPending] = useState(false);
 
+  function formatAuthError(message?: string) {
+    if (!message) return "Could not continue right now.";
+    if (message.includes("MongoDB connection string") || message.includes("MONGO_URI") || message.includes("MONGODB_URI")) {
+      return "Server setup is incomplete. Add the MongoDB connection string in production environment variables and redeploy.";
+    }
+    return message;
+  }
+
   async function requestCode() {
     setPending(true);
     setError("");
     setInfo("");
-    const response = await fetch("/api/auth/request-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phoneNumber, purpose: "seller_login" })
-    });
-    const data = await response.json();
-    setPending(false);
-    if (!response.ok) {
-      setError(data.error || "Could not send OTP.");
-      return;
+    try {
+      const response = await fetch("/api/auth/request-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber, purpose: "seller_login" })
+      });
+      const data = await response.json();
+      setPending(false);
+      if (!response.ok) {
+        setError(formatAuthError(data.error || "Could not send OTP."));
+        return;
+      }
+      setStep("verify");
+      setInfo(data.devCode ? `Dev OTP: ${data.devCode}` : "OTP sent to your phone.");
+    } catch {
+      setPending(false);
+      setError("Could not reach the server. Check the deployment health and environment configuration.");
     }
-    setStep("verify");
-    setInfo(data.devCode ? `Dev OTP: ${data.devCode}` : "OTP sent to your phone.");
   }
 
   async function verifyCode() {
     setPending(true);
     setError("");
-    const response = await signIn("credentials", {
-      phoneNumber,
-      otpCode,
-      redirect: false
-    });
-    setPending(false);
-    if (response?.error) {
-      setError("Invalid or expired OTP. Request a new code.");
-      return;
+    try {
+      const response = await signIn("credentials", {
+        phoneNumber,
+        otpCode,
+        redirect: false
+      });
+      setPending(false);
+      if (response?.error) {
+        setError("Invalid or expired OTP. Request a new code.");
+        return;
+      }
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setPending(false);
+      setError("Could not verify OTP right now. Check the server configuration and try again.");
     }
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (
